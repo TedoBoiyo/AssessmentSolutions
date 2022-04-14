@@ -45,48 +45,54 @@ function segments(message) {
     return result;
 }
 
-// /*Optimized Version*/
-// function segments(message) {
-//     const segLength = 160; //Max sized segment length
+/*Optimized Version*/
+function segments(message) {
+    const segLength = 160; //Max sized segment length
     
-//     //Edge case
-//     if(message.length <= segLength) {
-//         return [message];
-//     }
+    //Edge case
+    if(message.length <= segLength) {
+        return [message];
+    }
     
-//     //(Message length + segment count * suffix count) / segment length
-//     const totalSeg = Math.ceil((message.length + Math.ceil(message.length / segLength) * 5) / segLength);
+    //(Message length + segment count * suffix count) / segment length
+    const totalSeg = Math.ceil((message.length + Math.ceil(message.length / segLength) * 5) / segLength);
     
-//     //Had to use RegExp to find all instances of commas due to the original way being unable to recognize certain instances
-//     message = message.replace(new RegExp(",", 'g'), "1").split("");
+    //Had to use RegExp to find all instances of commas due to the original way being unable to recognize certain instances
+    message = message.replace(new RegExp(",", 'g'), "1").split("");
 
-//     return segment([], message, 1, totalSeg);
-// }
+    return segment([], message, 1, totalSeg);
+}
 
-// function segment(result, message, segCount, totalSeg) {
-//     let oldIndex = 155
-//     let newIndex = oldIndex;
+//Recurse through message until sms is in segments
+function segment(result, message, segCount, totalSeg) {
+    const oldIndex = 155
+    let newIndex = oldIndex;
        
-//     //End of segment
-//     if(segCount === totalSeg) {
-//         result.push(message.join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(segCount, totalSeg));
-//         return result;
-//     }
+    //End of segment
+    if(segCount === totalSeg) {
+        result.push(message.join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(segCount, totalSeg));
+        return result;
+    }
 
-//     while(message[newIndex] !== " " && newIndex >= 0) {
-//         newIndex--;
-//     }
+    //Iterate to the closest index that has a space
+    while(message[newIndex] !== " " && newIndex >= 0) {
+        newIndex--;
+    }
 
-//     if (oldIndex === newIndex) {
-//         result.push(message.splice(0, oldIndex).join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(segCount, totalSeg));
-//         result = segment(result, message, segCount++, totalSeg);
-//     } else {
-//         result.push(message.splice(0, newIndex + 1).join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(segCount, totalSeg));
-//         result = segment(result, message, segCount++, totalSeg);
-//     }
+    //Do not include space in this segment
+    if (oldIndex === newIndex) {
+        result.push(message.splice(0, oldIndex).join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(segCount, totalSeg));
+    } 
+
+    //Include the space in this segement
+    if (oldIndex !== newIndex) {
+        result.push(message.splice(0, newIndex + 1).join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(segCount, totalSeg));
+    }
+
+    result = segment(result, message, segCount + 1, totalSeg);
     
-//     return result;
-// }
+    return result;
+}
 
 /*Helper Functions*/
 
