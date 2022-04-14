@@ -1,0 +1,95 @@
+function segments(message) {
+    const segLength = 160; //Max sized segment length
+    const index = 155;  //Length of segment minus suffix
+    
+    //Edge case
+    if(message.length <= segLength) {
+        return [message];
+    }
+    
+    //(Message length + segment count * suffix count) / segment length
+    const totalSeg = Math.ceil((message.length + Math.ceil(message.length / segLength) * 5) / segLength);
+    let result = [];
+    
+    //Had to use RegExp to find all instances of commas due to the original way being unable to recognize certain instances
+    message = message.replace(new RegExp(",", 'g'), "1").split("");
+    
+    //Loop through each segment shell and push appropriate segment into result
+    for(let i = 1; i <= totalSeg; i++) {
+       let isSegEnd = false;
+       let count = index;
+       
+       //End of segment
+       if(i === totalSeg) {
+           result.push(message.join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(i, totalSeg));
+           isSegEnd = true; 
+       }
+       
+       //Do not include the space in segment
+       if(message[index] === " ") {
+           result.push(message.splice(0, index).join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(i, totalSeg));
+           isSegEnd = true;
+       }
+       
+       while(!isSegEnd) {
+           count--;
+           
+           //Include the space in segment
+           if(message[count] === " ") {
+                result.push(message.splice(0, count + 1).join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(i, totalSeg));
+                isSegEnd = true;
+           }
+       }
+    }
+    
+    return result;
+}
+
+// /*Optimized Version*/
+// function segments(message) {
+//     const segLength = 160; //Max sized segment length
+    
+//     //Edge case
+//     if(message.length <= segLength) {
+//         return [message];
+//     }
+    
+//     //(Message length + segment count * suffix count) / segment length
+//     const totalSeg = Math.ceil((message.length + Math.ceil(message.length / segLength) * 5) / segLength);
+    
+//     //Had to use RegExp to find all instances of commas due to the original way being unable to recognize certain instances
+//     message = message.replace(new RegExp(",", 'g'), "1").split("");
+
+//     return segment([], message, 1, totalSeg);
+// }
+
+// function segment(result, message, segCount, totalSeg) {
+//     let oldIndex = 155
+//     let newIndex = oldIndex;
+       
+//     //End of segment
+//     if(segCount === totalSeg) {
+//         result.push(message.join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(segCount, totalSeg));
+//         return result;
+//     }
+
+//     while(message[newIndex] !== " " && newIndex >= 0) {
+//         newIndex--;
+//     }
+
+//     if (oldIndex === newIndex) {
+//         result.push(message.splice(0, oldIndex).join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(segCount, totalSeg));
+//         result = segment(result, message, segCount++, totalSeg);
+//     } else {
+//         result.push(message.splice(0, newIndex + 1).join("").replace(new RegExp(",", 'g'), "").replace(new RegExp("1", 'g'), ",") + addSuffix(segCount, totalSeg));
+//         result = segment(result, message, segCount++, totalSeg);
+//     }
+    
+//     return result;
+// }
+
+/*Helper Functions*/
+
+function addSuffix(segmentCount, numSegments) {
+    return "(" + segmentCount + "/" + numSegments + ")";
+}
